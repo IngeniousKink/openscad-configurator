@@ -116,13 +116,18 @@ downloadBtn.onclick = (e) => {
   triggerWorker(downloadFile);
 }
 
+window.onload = (e) => {
+  triggerWorker(renderFile);
+}
+
 const triggerWorker = async (callback) => {
   worker = new Worker("./configurator.worker.js");
 
   worker.onmessage = function (e) {
     callback(e.data);
     spinnerImg.hidden = true;
-    generateBtn.disabled = false;
+    previewBtn.disabled = false;
+    downloadBtn.disabled = false;
     worker.terminate();
   };
 
