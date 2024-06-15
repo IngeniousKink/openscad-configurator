@@ -10,6 +10,15 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css"
     />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.min.js",
+          "three/examples/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/"
+        }
+      }
+    </script>
+    <script src="stlviewer.js" type="module"></script>
     <link rel="stylesheet" href="configurator.css" />
   </head>
   <body>
@@ -36,12 +45,17 @@
       </div>
 
       <div class="buttons">
-        <button id="generate" type="submit">Generate STL</button>
+        <button id="generate" type="submit">Preview</button>
+        &nbsp;
+        <button id="download" type="submit">Download STL</button>
         <img id="spinner" src="./spinner.gif" width="25" height="25" hidden/>
         <button id="cancel" type="button">Cancel</button>
       </div>
       
     </form>
     <script src="configurator.js" type="module"></script>
+
+    <div id="stlviewer" style="height: 50vh; width: 80vh;"></div>
+
   </body>
 </html>

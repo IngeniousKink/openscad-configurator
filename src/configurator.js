@@ -1,52 +1,70 @@
-const form = document.getElementById("configurator");
-const generateBtn = document.getElementById("generate");
-const cancelBtn = document.getElementById("cancel");
-const spinnerImg = document.getElementById("spinner");
+import { STLViewer } from './stlviewer.js';
 
-let worker;
+(function () {
+  'use strict';
 
-cancelBtn.onclick = (e) => {
-  e.preventDefault();
+  const form = document.getElementById("configurator");
+  const generateBtn = document.getElementById("generate");
+  const cancelBtn = document.getElementById("cancel");
+  const spinnerImg = document.getElementById("spinner");
 
-  if(worker){
-    worker.terminate();
-  }
+  let worker;
 
-  spinnerImg.hidden = true;
-  generateBtn.disabled = false;
-}
+  cancelBtn.onclick = (e) => {
+    e.preventDefault();
 
-form.onsubmit = async (e) => {
-  e.preventDefault();
+    if(worker){
+      worker.terminate();
+    }
 
-  worker = new Worker("./configurator.worker.js");
-
-  worker.onmessage = function (e) {
-    downloadFile(e.data, "gear.stl");
     spinnerImg.hidden = true;
     generateBtn.disabled = false;
-    worker.terminate();
   };
 
-  spinnerImg.hidden = false;
-  generateBtn.disabled = true;
+  form.onsubmit = async (e) => {
+    e.preventDefault();
 
-  const values = new FormData(form);
-  worker.postMessage({
-    pitch: values.get("pitch"),
-    teeth: values.get("teeth"),
-    thickness: values.get("thickness"),
-    boreDiameter: values.get("bore-diameter"),
-  });
-};
+    worker = new Worker("./configurator.worker.js");
 
-function downloadFile(output, fileName) {
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(
-    new Blob([output], { type: "application/octet-stream" }),
-  );
-  link.download = fileName;
-  document.body.append(link);
-  link.click();
-  link.remove();
-}
+    worker.onmessage = function (e) {
+      // downloadFile(e.data, "gear.stl");
+      renderFile(e.data, "gear.stl");
+      spinnerImg.hidden = true;
+      generateBtn.disabled = false;
+      worker.terminate();
+    };
+
+    spinnerImg.hidden = false;
+    generateBtn.disabled = true;
+
+    const values = new FormData(form);
+    worker.postMessage({
+      pitch: values.get("pitch"),
+      teeth: values.get("teeth"),
+      thickness: values.get("thickness"),
+      boreDiameter: values.get("bore-diameter"),
+    });
+  };
+
+  function downloadFile(output, fileName) {
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(
+      new Blob([output], { type: "application/octet-stream" }),
+    );
+    link.download = fileName;
+    document.body.append(link);
+    link.click();
+    link.remove();
+  }
+
+  function renderFile(output, fileName) {
+    var div = document.getElementById('stlviewer');
+    const url = URL.createObjectURL(
+      new Blob([output], { type: "application/octet-stream" }),
+    );
+
+    STLViewer(div, url);
+  }
+
+
+})();
