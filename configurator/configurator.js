@@ -138,10 +138,13 @@ const triggerWorker = async (callback) => {
 
   const values = new FormData(form);
   worker.postMessage({
-    pitch: values.get("pitch"),
-    teeth: values.get("teeth"),
-    thickness: values.get("thickness"),
-    boreDiameter: values.get("bore-diameter"),
+    url: "./gear.scad",
+    params: {
+      pitch: values.get("pitch"),
+      teeth: values.get("teeth"),
+      thickness: values.get("thickness"),
+      bore_diameter: values.get("bore-diameter"),
+    }
   });
 };
 

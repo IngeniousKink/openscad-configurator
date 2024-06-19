@@ -1,15 +1,15 @@
 import { addMCAD } from "../lib/openscad.mcad.js";
 
 onmessage = async function(e) {
-  const args = e.data;
-  const gear = await generateGear(args.pitch, args.teeth, args.thickness, args.boreDiameter);
-  postMessage(gear);
-}
+  const { params, url, source } = e.data; // Destructure the data object to get params, url, and source
+  const model = await generateModel(params, url, source);
+  postMessage(model);
+};
 
-async function generateGear(pitch, teeth, thickness, boreDiameter) {
+async function generateModel(params, url, source) {
   globalThis.OpenSCAD = {
     noInitialRun: true,
-  }
+  };
 
   importScripts("./openscad.wasm.js");
 
@@ -18,22 +18,25 @@ async function generateGear(pitch, teeth, thickness, boreDiameter) {
   });
 
   const inst = globalThis.OpenSCAD;
-
   addMCAD(inst);
 
-  const sourceRes = await fetch("./gear.scad");
-  const source = await sourceRes.text();
-  inst.FS.writeFile("/source.scad", source);
+  // If a source code string is provided, use it. Otherwise, fetch the SCAD source from the file with the given url
+  let scadSource;
+  if (source) {
+    scadSource = source;
+  } else {
+    const sourceRes = await fetch(url);
+    scadSource = await sourceRes.text();
+  }
+  inst.FS.writeFile("/source.scad", scadSource);
 
-  inst.callMain([
-    "/source.scad",
-    "-o",
-    "out.stl",
-    `-DPITCH=${pitch}`,
-    `-DTEETH=${teeth}`,
-    `-DTHICKNESS=${thickness}`,
-    `-DBORE_DIAMETER=${boreDiameter}`,
-  ]);
+  // Generate the command arguments using key-value pairs from params
+  const argList = ["/source.scad", "-o", "out.stl"];
+  for (const [key, value] of Object.entries(params)) {
+    argList.push(`-D${key.toUpperCase()}=${value}`);
+  }
+  console.log('Invoking OpenSCAD with', argList);
+  inst.callMain(argList);
   const output = inst.FS.readFile("/out.stl");
 
   return output;
