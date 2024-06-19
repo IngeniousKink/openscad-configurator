@@ -12,18 +12,10 @@ import WebGL from 'three/examples/jsm/capabilities/WebGL.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 
-export function STLViewerEnable(classname) {
-  var models = document.getElementsByClassName(classname);
-  for (var i = 0; i < models.length; i++) {
-      STLViewer(models[i], models[i].getAttribute("data-src"));
-  }
-}
-
-export function STLViewer(elem, model) {
-
+export function STLViewer(elem) {
   if (!WebGL.isWebGLAvailable()) {
-      elem.appendChild(WebGL.getWebGLErrorMessage());
-      return;
+    elem.appendChild(WebGL.getWebGLErrorMessage());
+    return;
   }
 
   var renderer = new WebGLRenderer({ antialias: true, alpha: true });
@@ -32,28 +24,44 @@ export function STLViewer(elem, model) {
   elem.appendChild(renderer.domElement);
 
   window.addEventListener('resize', function () {
-      renderer.setSize(elem.clientWidth, elem.clientHeight);
-      camera.aspect = elem.clientWidth / elem.clientHeight;
-      camera.updateProjectionMatrix();
+    renderer.setSize(elem.clientWidth, elem.clientHeight);
+    camera.aspect = elem.clientWidth / elem.clientHeight;
+    camera.updateProjectionMatrix();
   }, false);
 
   var controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  controls.enableDamping = false;
   controls.rotateSpeed = 0.05;
   controls.dampingFactor = 0.1;
   controls.enableZoom = false;
   controls.enablePan = false;
   controls.autoRotate = true;
-  controls.autoRotateSpeed = .75;
+  controls.autoRotateSpeed = 5;
 
   var scene = new Scene();
-
   scene.add(new HemisphereLight(0xffffff, 0x080820, 1.5));
 
-  (new STLLoader()).load(model, function (geometry) {
+  var stlLoader = new STLLoader();
+  var currentMesh;
+  var animate = function () {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  };
+  animate();
+
+  // Return the loadModel callback function
+  return function loadModel(model) {
+
+    stlLoader.load(model, function (geometry) {
       var material = new MeshPhongMaterial({ color: 0x00ff00, specular: 100, shininess: 100 });
-      var mesh = new Mesh(geometry, material);
-      scene.add(mesh);
+
+      if (currentMesh) {
+        // Clear previous model from the scene if available
+        scene.remove(currentMesh);
+      }
+      currentMesh = new Mesh(geometry, material);
+      scene.add(currentMesh);
 
       // Compute the middle
       var middle = new Vector3();
@@ -61,23 +69,16 @@ export function STLViewer(elem, model) {
       geometry.boundingBox.getCenter(middle);
 
       // Center it
-      mesh.position.x = -1 * middle.x;
-      mesh.position.y = -1 * middle.y;
-      mesh.position.z = -1 * middle.z;
+      currentMesh.position.x = -1 * middle.x;
+      currentMesh.position.y = -1 * middle.y;
+      currentMesh.position.z = -1 * middle.z;
 
       // Pull the camera away as needed
       var largestDimension = Math.max(geometry.boundingBox.max.x,
-          geometry.boundingBox.max.y, geometry.boundingBox.max.z)
+        geometry.boundingBox.max.y, geometry.boundingBox.max.z);
       camera.position.z = largestDimension * 1.5;
-
-
-      var animate = function () {
-          requestAnimationFrame(animate);
-          controls.update();
-          renderer.render(scene, camera);
-      }; animate();
-
-  });
+    });
+  };
 }
 
 const form = document.getElementById("configurator");
@@ -92,7 +93,7 @@ let worker;
 cancelBtn.onclick = (e) => {
   e.preventDefault();
 
-  if(worker){
+  if (worker) {
     worker.terminate();
   }
 
@@ -158,12 +159,18 @@ function downloadFile(output) {
   link.remove();
 }
 
+let loadModel;
+
 function renderFile(output) {
   const url = URL.createObjectURL(
     new Blob([output], { type: "application/octet-stream" }),
   );
 
-  STLViewer(preview, url);
+  if (!loadModel) {
+    loadModel = STLViewer(preview);
+  }
+
+  loadModel(url);
 }
 
 

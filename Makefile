@@ -1,10 +1,13 @@
-build: configurator/openscad.wasm configurator/openscad.wasm.js
+build: configurator/configurator.worker.js configurator/openscad.wasm configurator/openscad.wasm.js 
 
 configurator/openscad.wasm: lib
 	cp lib/openscad.wasm $@
 
 configurator/openscad.wasm.js: lib
 	cp lib/openscad.wasm.js $@
+
+configurator/configurator.worker.js: src/* lib node_modules
+	npx rollup src/configurator.worker.js --file $@ --format iife
 
 run: lib node_modules
 	npx http-server configurator
