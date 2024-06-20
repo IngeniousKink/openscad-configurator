@@ -137,15 +137,19 @@ const triggerWorker = async (callback) => {
   downloadBtn.disabled = true;
 
   const values = new FormData(form);
-  worker.postMessage({
-    url: "./gear.scad",
-    params: {
-      pitch: values.get("pitch"),
-      teeth: values.get("teeth"),
-      thickness: values.get("thickness"),
-      bore_diameter: values.get("bore-diameter"),
+  const params = {};
+  
+  for (const [key, value] of values.entries()) {
+    if (key !== 'url') {
+      params[key] = value;
     }
+  }
+  
+  worker.postMessage({
+    url: values.get('url'),
+    params: params
   });
+  
 };
 
 function downloadFile(output) {
