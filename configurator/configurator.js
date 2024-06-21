@@ -31,12 +31,11 @@ export function STLViewer(elem) {
 
   var controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = false;
-  controls.rotateSpeed = 0.05;
   controls.dampingFactor = 0.1;
   controls.enableZoom = false;
   controls.enablePan = false;
   controls.autoRotate = true;
-  controls.autoRotateSpeed = 5;
+  controls.autoRotateSpeed = 1;
 
   var scene = new Scene();
   scene.add(new HemisphereLight(0xffffff, 0x080820, 1.5));
@@ -73,9 +72,16 @@ export function STLViewer(elem) {
       currentMesh.position.y = -1 * middle.y;
       currentMesh.position.z = -1 * middle.z;
 
+      currentMesh.rotation.x = Math.PI * 1/2;
+      currentMesh.rotation.y = Math.PI * 4/3;
+
       // Pull the camera away as needed
-      var largestDimension = Math.max(geometry.boundingBox.max.x,
-        geometry.boundingBox.max.y, geometry.boundingBox.max.z);
+      var largestDimension = Math.max(
+        geometry.boundingBox.max.x,
+        geometry.boundingBox.max.y,
+        geometry.boundingBox.max.z
+      );
+
       camera.position.z = largestDimension * 1.5;
     });
   };
