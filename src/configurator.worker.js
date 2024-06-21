@@ -1,4 +1,5 @@
 import { addMCAD } from "../lib/openscad.mcad.js";
+import { addFonts } from "../lib/openscad.fonts.js";
 
 onmessage = async function(e) {
   const { params, url, source } = e.data; // Destructure the data object to get params, url, and source
@@ -19,6 +20,7 @@ async function generateModel(params, url, source) {
 
   const inst = globalThis.OpenSCAD;
   addMCAD(inst);
+  addFonts(inst);
 
   // If a source code string is provided, use it. Otherwise, fetch the SCAD source from the file with the given url
   let scadSource;
