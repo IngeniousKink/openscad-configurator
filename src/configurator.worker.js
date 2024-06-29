@@ -32,8 +32,16 @@ async function generateModel(params, url, source) {
   }
   inst.FS.writeFile("/source.scad", scadSource);
 
-  // Generate the command arguments using key-value pairs from params
+  const features = ['manifold', 'fast-csg', 'lazy-union'];
+
   const argList = ["/source.scad", "-o", "out.stl"];
+  
+  for (const [key, value] of Object.entries(features)) {
+    argList.push('--enable');
+    argList.push(value);
+  }
+  
+  // Generate the command arguments using key-value pairs from params
   for (const [key, value] of Object.entries(params)) {
     argList.push(`-D${key}=${value}`);
   }
