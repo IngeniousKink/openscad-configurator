@@ -32,7 +32,7 @@ export function STLViewer(elem) {
   var controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = false;
   controls.dampingFactor = 0.1;
-  controls.enableZoom = false;
+  controls.enableZoom = true;
   controls.enablePan = false;
   controls.autoRotate = true;
   controls.autoRotateSpeed = 1;
