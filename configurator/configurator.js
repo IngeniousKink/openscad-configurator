@@ -147,7 +147,11 @@ const triggerWorker = async (callback) => {
   
   for (const [key, value] of values.entries()) {
     if (key !== 'url') {
-      params[key] = value;
+      if (value === "on") {
+        params[key] = "true";
+      } else {
+       params[key] = value;
+      }
     }
   }
   
