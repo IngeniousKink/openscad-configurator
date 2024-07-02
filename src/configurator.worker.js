@@ -37,13 +37,12 @@ async function generateModel(params, url, source) {
   const argList = ["/source.scad", "-o", "out.stl"];
   
   for (const [key, value] of Object.entries(features)) {
-    argList.push('--enable');
-    argList.push(value);
+    argList.push(`--enable=${value}`);
   }
   
   // Generate the command arguments using key-value pairs from params
   for (const [key, value] of Object.entries(params)) {
-    argList.push(`-D${key}=${value}`);
+    argList.push(`-D${key}=${JSON.stringify(value)}`);
   }
   console.log('Invoking OpenSCAD with', argList);
   inst.callMain(argList);

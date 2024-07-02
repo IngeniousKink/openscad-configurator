@@ -144,11 +144,16 @@ const triggerWorker = async (callback) => {
 
   const values = new FormData(form);
   const params = {};
+
   
   for (const [key, value] of values.entries()) {
     if (key !== 'url') {
-      if (value === "on") {
-        params[key] = "true";
+      const input = document.getElementById(key);
+      console.log(input.type);
+      if (input.type === "checkbox") {
+        params[key] = value === "on";
+      } else if (input.type === "number") {
+       params[key] = Number(value);
       } else {
        params[key] = value;
       }
